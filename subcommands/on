@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
 source "$PLUGIN_BASE_PATH/common/functions"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/property-functions"
 source "$PLUGIN_AVAILABLE_PATH/nginx-vhosts/functions"
+source "$PLUGIN_AVAILABLE_PATH/maintenance/internal-functions"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
 maintenance-on-cmd() {
   declare desc="put the app into maintenance mode"
   declare APP="$2"
-  local NGINX_CONF_D="$DOKKU_ROOT/$APP/nginx.conf.d"
+  declare MAINTENANCE_REASON="$3"
   local MAINTENANCE_APP_D="$DOKKU_ROOT/$APP/maintenance"
+  local MAINTENANCE_TEMPLATE="$MAINTENANCE_PLUGIN_ROOT/templates/maintenance.html.sigil"
+  local SIGIL_PARAMS=(APP="$APP" MAINTENANCE_REASON="$MAINTENANCE_REASON")
+
 
   [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
   verify_app_name "$APP"
@@ -18,11 +23,12 @@ maintenance-on-cmd() {
 
   if [[ ! -d "$MAINTENANCE_APP_D" ]]; then
     mkdir "$MAINTENANCE_APP_D"
-    cp "$MAINTENANCE_PLUGIN_ROOT/templates/maintenance.html" "$MAINTENANCE_APP_D"
+    sigil -f "$MAINTENANCE_TEMPLATE" "${SIGIL_PARAMS[@]}" | cat -s >"$MAINTENANCE_APP_D"
   fi
+ 
+  # sigil -f "$NGINX_CONF_TEMPLATE" "${SIGIL_PARAMS[@]}" | cat -s >"$NGINX_CONF_D"
+  fn-maintenace-template-config "$APP"
 
-  cp "$MAINTENANCE_PLUGIN_ROOT/templates/maintenance.conf" "$NGINX_CONF_D"
-  sed -i "s,{APP_ROOT},$DOKKU_ROOT/$APP," "$NGINX_CONF_D/maintenance.conf"
   restart_nginx
   dokku_log_verbose "done"
 }

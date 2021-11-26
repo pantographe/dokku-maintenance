@@ -1,0 +1,16 @@
+location ~* ^(.*)$ {
+  root {{ $.APP_ROOT }}/maintenance/;
+
+  {{ if $.MAINTENANCE_ALLOWED_IPS }}
+  if ($remote_addr !~ ({{ $.MAINTENANCE_ALLOWED_IPS | split "," | join "|" }})) {
+    try_files $uri =503;
+  }
+  {{ end }}
+}
+
+error_page 503 @maintenance;
+
+location @maintenance {
+  root {{ $.APP_ROOT }}/maintenance/;
+  rewrite ^(.*)$ /maintenance.html break;
+}

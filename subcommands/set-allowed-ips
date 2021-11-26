@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+source "$PLUGIN_BASE_PATH/common/functions"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/property-functions"
+source "$PLUGIN_AVAILABLE_PATH/nginx-vhosts/functions"
+source "$PLUGIN_AVAILABLE_PATH/maintenance/internal-functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+maintenance-add-allowed-ip-cmd() {
+  declare desc="add allowed ip to maintenance page for an app"
+  declare APP="$2" ADDRESS="$3"
+
+
+  dokku_log_info1 "Adding $ADDRESS to allowed ip list"
+  fn-plugin-property-list-add "maintenance" "$APP" "allowed-ips" "$ADDRESS"
+  fn-maintenace-template-config "$APP"
+  plugn trigger proxy-build-config "$APP"
+}
+
+maintenance-add-allowed-ip-cmd "$@"

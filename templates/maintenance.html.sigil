@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <meta name="refresh" content="60">
+    <meta name="retry-after" content="100">
+    <meta name="robots" content="noindex, nofollow, noarchive, nostore">
+    <meta name="cache-control" content="no-cache, no-store">
+    <meta name="pragma" content="no-cache">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Application Offline for Maintenance</title>
+    <style type="text/css">
+      body {
+        background-color: #6CABF7;
+        color: #fff;
+        text-align: center;
+        font-family: arial, sans-serif;
+        margin: 0;
+      }
+      div {
+        position:absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+      }
+      p {
+        color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h2>Application Offline for Maintenance</h2>
+      <p>This application is undergoing maintenance right now.  Please check back later.</p>
+      {{ if $.MAINTENANCE_REASON }}<p>{{ $.MAINTENANCE_REASON }}</p>{{ end }}
+    </div>
+  </body>
+</html>

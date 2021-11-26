@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+
+fn-http-auth-template-config() {
+  declare APP="$1"
+  local APP_ROOT="$DOKKU_ROOT/$APP"
+  local DOKKU_TEMPLATE="$MAINTENANCE_PLUGIN_ROOT/templates/maintenance.conf.sigil"
+  
+  local ALLOWED_IPS="$(fn-plugin-property-list-get "maintenance" "$APP" "allowed-ips" | xargs)"
+  mkdir -p "$APP_ROOT/nginx.conf.d"
+
+  sigil -f "$DOKKU_TEMPLATE" APP_ROOT="$APP_ROOT" ALLOWED_IPS="$ALLOWED_IPS" | cat -s >"$APP_ROOT/nginx.conf.d/maintenance.conf"
+}
